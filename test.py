@@ -7,7 +7,7 @@ from numpy.core.fromnumeric import size
 # Mendeteksi camera bawaan
 cap = cv2.VideoCapture(0)
 # Gambar Template
-template = cv2.imread("assets/reza/master/reza1a.jpg", cv2.IMREAD_GRAYSCALE)
+template = cv2.imread("assets/master/1.jpg", cv2.IMREAD_GRAYSCALE)
 # Mengambil ukuran gambar
 w, h = template.shape[::-1]
 # print(w, h)
@@ -24,7 +24,7 @@ while True:
     # print(imgSize)
     # Mengecek kecocokan
     sizeImg = (imgSize[0], imgSize[1])
-    loc = np.where(res >= 0.8)
+    loc = np.where(res >= 0.2)
     # for pt in zip(*loc[::-1]):
     # print(pt)
     # Menggambar Rectangle dari frame camera , dan membentuk rectangle , dengan warna dan ketebalan

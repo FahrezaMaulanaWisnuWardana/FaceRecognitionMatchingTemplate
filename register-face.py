@@ -1,5 +1,6 @@
 import cv2
-cam = cv2.VideoCapture(0)
+cam = cv2.VideoCapture('http://192.168.43.35:80/cam.mjpeg')
+print(cam)
 
 cam.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 cam.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
