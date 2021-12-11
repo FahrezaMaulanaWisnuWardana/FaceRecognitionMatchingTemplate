@@ -1,31 +1,27 @@
 import cv2
-import matplotlib.pyplot as plt
-import urllib.request
 import numpy as np
-import concurrent.futures
+import urllib.request
+url = "http://192.168.43.35/cam-hi.jpg"
 
-url = 'http://192.168.43.35/cam-hi.jpg'
-im = None
+# img = cv2.imread('aku.jpg', 0)
+template = cv2.imread('assets/master/1.jpg', 0)
+h, w = template.shape
 
+while True:
+    img_resp = urllib.request.urlopen(url)
+    imgnp = np.array(bytearray(img_resp.read()), dtype=np.uint8)
+    frame = cv2.imdecode(imgnp, -1)
+    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    res = cv2.matchTemplate(gray_frame, template, cv2.TM_CCOEFF_NORMED)
+    print(res)
+    loc = np.where(res >= 0.8)
+    for pt in zip(*loc[::-1]):
+        p = cv2.rectangle(frame, pt, (pt[0]+w, pt[1]+h), (0, 255, 0), 1)
+    # Menggambar Rectangle dari frame camera , dan membentuk rectangle , dengan warna dan ketebalan
+    cv2.imshow("live transmission", frame)
 
-def run1():
-    cv2.namedWindow("live transmission", cv2.WINDOW_AUTOSIZE)
-    while True:
-        img_resp = urllib.request.urlopen(url)
-        imgnp = np.array(bytearray(img_resp.read()), dtype=np.uint8)
-        print(imgnp)
-        im = cv2.imdecode(imgnp, -1)
+    key = cv2.waitKey(5)
+    if key == ord('q'):
+        break
 
-        cv2.imshow('live transmission', im)
-        key = cv2.waitKey(5)
-        if key == ord('q'):
-            break
-
-    cv2.destroyAllWindows()
-
-
-if __name__ == '__main__':
-    print("started")
-    with concurrent.futures.ProcessPoolExecutor() as executer:
-        f1 = executer.submit(run1)
-        # f2 = executer.submit(run2)
+cv2.destroyAllWindows()
