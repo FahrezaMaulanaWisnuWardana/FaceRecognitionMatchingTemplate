@@ -1,0 +1,15 @@
+{
+    "status": 1,
+    "message": "Berhasil",
+    "data": [
+        {
+            "full_name": "Bintang Putera",
+            "face_data": [
+                12,
+                13,
+                14,
+                15
+            ]
+        }
+    ]
+}
