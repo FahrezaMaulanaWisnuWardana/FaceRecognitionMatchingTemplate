@@ -6,8 +6,8 @@ from PIL import Image, ImageTk
 from datetime import datetime
 import pathlib
 
-
-image_counter = 0
+global image_counter
+image_counter = 1
 
 
 def createwidgets():
@@ -79,51 +79,27 @@ def popup():
     global name
     name = Entry(top, width=37)
     name.grid(row=2, padx=10, pady=5)
-    captureBtn = Button(top, text="Absen", bg="Lightblue",
+    captureBtn = Button(top, text="Rekam", bg="Lightblue",
                         width=20, command=captureImg)
     captureBtn.grid(row=3, padx=10, pady=5)
     infoText = Label(
-        top, text="Dengan menekan tombol absen \n system akan merekam dan mencocokkan \n dengan wajah yang tersimpan \n didalam system")
+        top, text="Dengan menekan tombol rekam \n system akan merekam dan menyimpan \n foto \n didalam system")
     infoText.grid(row=4, padx=10, pady=15)
 
 
 def captureImg():
-    global imageLabel
+    global image_counter
     ret, frame = root.cap.read()
     path = pathlib.Path.cwd() / "assets" / name.get()
     path.mkdir(exist_ok=True)
-    img_name = 'assets/'+name.get()+'/'+name.get()+'.jpg'
-    abuAbu = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    cv2.imwrite(img_name, abuAbu)
+    img_name = 'assets/'+name.get()+'/'+name.get() + str(image_counter) + '.jpg'
+    crop = frame[y:y+h, x:x+w]
+    cv2.imwrite(img_name, crop)
+    image_counter += 1
+    # print(cv2.imread(img_name))
 
-    templateImg = cv2.imread('assets/'+name.get() +
-                             '/master/'+name.get()+'.jpg', 0)
 
-    scalePercent = 60
-    panjang = int(350)
-    tinggi = int(350)
-    dim = (panjang, tinggi)
-    print(templateImg.shape)
-
-    imgProc = cv2.imread(img_name, 0)
-    w, h = templateImg.shape[::-1]
-    crop = imgProc[y:h+y, x:x+w]
-    rows, cols = crop.shape
-
-    imgResize = cv2.resize(templateImg, dim, interpolation=cv2.INTER_AREA)
-    print(imgResize.shape)
-    res = cv2.matchTemplate(imgResize, crop, cv2.TM_SQDIFF_NORMED)
-    print(res)
-    loc = np.where(res >= 0.8)
-    for pt in zip(*loc[::-1]):
-        cv2.rectangle(templateImg, pt, (50, 50), (0, 0, 255), 1)
-
-    cv2.imshow('Cocok', imgResize)
-    cv2.imshow("croped", crop)
-    # bottom_right = (location[0]+cols-50, location[1]+rows)
-    # cv2.rectangle(img2, location, bottom_right, 255, 5)
-    # cv2.imshow('Cocok', img2)
-
+# crop image
 
 # Settingan camera
 
