@@ -1,8 +1,9 @@
 import cv2
 import numpy as np
+import urllib.request
 
+# url = "http://192.168.0.105/cam-hi.jpg"
 cam = cv2.VideoCapture(0)
-# print(video)
 frame_w = int(cam.get(3))
 frame_h = int(cam.get(4))
 out = cv2.VideoWriter('test.avi', cv2.VideoWriter_fourcc(
@@ -26,6 +27,9 @@ templatesSizes.append(templates[2].shape[::-1])
 threshold = 0.7
 while True:
     ret, frame = cam.read()
+    # img_resp = urllib.request.urlopen(url)
+    # imgnp = np.array(bytearray(img_resp.read()), dtype=np.uint8)
+    # frame = cv2.imdecode(imgnp, -1)
     rgb_img = frame
     img = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
 
@@ -55,12 +59,12 @@ while True:
             position = (10, 50)
             cv2.putText(rgb_img, ('CHECK' + str(img_class)), position,
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 3)
-    out.write(rgb_img)
+    # out.write(rgb_img)
     cv2.imshow('webcam', rgb_img)
     k = cv2.waitKey(1) & 0xFF
     if k == 27 or k == ord('q'):
         break
 
-cam.release()
-out.release()
+# cam.release()
+# out.release()
 cv2.destroyAllWindows()
