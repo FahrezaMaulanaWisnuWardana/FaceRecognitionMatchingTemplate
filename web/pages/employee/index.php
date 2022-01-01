@@ -48,14 +48,16 @@ $result = mysqli_query($mysqli, $select_all_query);
                                             <th>Tanggal Lahir</th>
                                         </tr>
                                     </thead>
-                                    <?php
-                                    while ($item_data = mysqli_fetch_array($result)) {
-                                    ?>
-                                        <td><?= $item_data['fullname'] ?></td>
-                                        <td><?= $item_data['gender'] ?></td>
-                                        <td><?= $item_data['birth_date'] ?></td>
-                                    <?php } ?>
                                     <tbody>
+                                        <?php
+                                        while ($item_data = mysqli_fetch_array($result)) {
+                                        ?>
+                                            <tr>
+                                                <td><?= $item_data['fullname'] ?></td>
+                                                <td><?= $item_data['gender'] ?></td>
+                                                <td><?= $item_data['birth_date'] ?></td>
+                                            </tr>
+                                        <?php } ?>
                                     </tbody>
                                 </table>
                             </div>

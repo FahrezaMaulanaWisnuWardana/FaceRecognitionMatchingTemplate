@@ -113,9 +113,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <?php echo $_ENV['BASE_URL']; ?>
-
                     </div>
 
                 </div>
