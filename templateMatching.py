@@ -1,8 +1,8 @@
 import numpy as np
 import cv2
 
-img = cv2.imread('aku.jpg', 0)
-template = cv2.imread('akucrop.png', 0)
+img = cv2.imread('1.jpg', 0)
+template = cv2.imread('2.jpg', 0)
 h, w = template.shape
 
 methods = [cv2.TM_CCOEFF, cv2.TM_CCOEFF_NORMED, cv2.TM_CCORR,

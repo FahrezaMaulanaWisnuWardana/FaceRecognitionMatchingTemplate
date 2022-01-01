@@ -1,6 +1,15 @@
 import cv2
+import glob
 import numpy as np
+import tkinter as tk
+from tkinter import *
 import urllib.request
+import os
+
+imdir = 'assets/master/'
+ext = ['jpg', 'png']
+files = []
+[files.extend(glob.glob(imdir + '*.'+e)) for e in ext]
 
 # url = "http://192.168.0.105/cam-hi.jpg"
 cam = cv2.VideoCapture(0)
@@ -11,15 +20,20 @@ out = cv2.VideoWriter('test.avi', cv2.VideoWriter_fourcc(
 
 templates = []
 templatesSizes = []
+counter = 0
+for file in files:
+    templates.append(cv2.imread(file, 0))
+    templatesSizes.append(templates[counter].shape[::-1])
+    counter += 1
 
-templates.append(cv2.imread('1.jpg', 0))
-templatesSizes.append(templates[0].shape[::-1])
+# templates.append(cv2.imread('1.jpg', 0))
+# templatesSizes.append(templates[0].shape[::-1])
 
-templates.append(cv2.imread('2.jpg', 0))
-templatesSizes.append(templates[1].shape[::-1])
+# templates.append(cv2.imread('2.jpg', 0))
+# templatesSizes.append(templates[1].shape[::-1])
 
-templates.append(cv2.imread('3.jpg', 0))
-templatesSizes.append(templates[2].shape[::-1])
+# templates.append(cv2.imread('3.jpg', 0))
+# templatesSizes.append(templates[2].shape[::-1])
 
 # templates.append(cv2.imread('4.jpg', 0))
 # templatesSizes.append(templates[3].shape[::-1])
@@ -57,7 +71,7 @@ while True:
                     rgb_img, pt, (pt[0] + templatesSizes[img_class][0], pt[1] + templatesSizes[img_class][1]), (0, 0, 255), 1)
 
             position = (10, 50)
-            cv2.putText(rgb_img, ('CHECK' + str(img_class)), position,
+            cv2.putText(rgb_img, (os.path.splitext(os.path.basename(files[img_class]))[0]), position,
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 3)
     # out.write(rgb_img)
     cv2.imshow('webcam', rgb_img)
