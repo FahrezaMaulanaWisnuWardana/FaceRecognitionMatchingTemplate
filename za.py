@@ -1,17 +1,33 @@
 import cv2
 import glob
 import numpy as np
-import tkinter as tk
 from tkinter import *
 import urllib.request
 import os
+import mysql.connector
+import xlsxwriter
+import pyfirmata
+import time
+
+board = pyfirmata.Arduino("COM9")
+
+db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="",
+    database="face-recognition"
+)
+conn = db.cursor()
+# for x in conn:
+# workbook = xlsxwriter.Workbook('Excel.xlsx')
+# worksheet = workbook.add_worksheet()
 
 imdir = 'assets/master/'
 ext = ['jpg', 'png']
 files = []
 [files.extend(glob.glob(imdir + '*.'+e)) for e in ext]
 
-# url = "http://192.168.0.105/cam-hi.jpg"
+# url = "http://192.168.43.35/cam-hi.jpg"
 cam = cv2.VideoCapture(0)
 frame_w = int(cam.get(3))
 frame_h = int(cam.get(4))
@@ -25,18 +41,6 @@ for file in files:
     templates.append(cv2.imread(file, 0))
     templatesSizes.append(templates[counter].shape[::-1])
     counter += 1
-
-# templates.append(cv2.imread('1.jpg', 0))
-# templatesSizes.append(templates[0].shape[::-1])
-
-# templates.append(cv2.imread('2.jpg', 0))
-# templatesSizes.append(templates[1].shape[::-1])
-
-# templates.append(cv2.imread('3.jpg', 0))
-# templatesSizes.append(templates[2].shape[::-1])
-
-# templates.append(cv2.imread('4.jpg', 0))
-# templatesSizes.append(templates[3].shape[::-1])
 
 threshold = 0.7
 while True:
@@ -58,27 +62,57 @@ while True:
             score = score + 1
             detected = 1
         scores.append(score)
-        # print(scores)
         if detected:
             img_class = scores.index(max(scores))
-            # print(img_class, "img")
             res = cv2.matchTemplate(
                 img, templates[img_class], cv2.TM_CCOEFF_NORMED)
-            # print(templates)
             loc = np.where(res >= threshold)
             for pt in zip(*loc[::-1]):
                 rgb_img = cv2.rectangle(
-                    rgb_img, pt, (pt[0] + templatesSizes[img_class][0], pt[1] + templatesSizes[img_class][1]), (0, 0, 255), 1)
-
+                    rgb_img, pt, (pt[0] + templatesSizes[img_class][0]+20, pt[1] + templatesSizes[img_class][1]+20), (0, 0, 255), 1)
+                name = str(os.path.splitext(
+                    os.path.basename(files[img_class]))[0])
+                arrExcel = templates[0][0]
+            # Text on top left
             position = (10, 50)
             cv2.putText(rgb_img, (os.path.splitext(os.path.basename(files[img_class]))[0]), position,
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 3)
-    # out.write(rgb_img)
+            # Query thing
+            sqlSelect = "SELECT COUNT(*) FROM absens WHERE DATE(waktu) = CURDATE()"
+            conn.execute(sqlSelect)
+            result = conn.fetchone()
+            sql = "INSERT INTO absens(nama) VALUES('{0}')".format(name)
+            sqlSelect = "SELECT nama,DATE_FORMAT(waktu, '%Y-%m-%d') as waktu FROM absens WHERE DATE(waktu) = CURDATE()"
+            if result[0] > 0:
+                conn.execute(sqlSelect)
+                for x in conn:
+                    if x[1] != name:
+                        conn.execute(sql)
+                        print("Inserted", conn.rowcount, "row(s) of data.")
+                        board.digital[7].write(1)
+                        board.digital[6].write(1)
+                        time.sleep(0.3)
+                        board.digital[7].write(0)
+                        board.digital[6].write(0)
+                        db.commit()
+                    else:
+                        print("User telah absen")
+            else:
+                conn.execute(sql)
+                print("Inserted", conn.rowcount, "row(s) of data.")
+                board.digital[7].write(1)
+                board.digital[6].write(1)
+                time.sleep(0.3)
+                board.digital[7].write(0)
+                board.digital[6].write(0)
+                db.commit()
+
     cv2.imshow('webcam', rgb_img)
     k = cv2.waitKey(1) & 0xFF
     if k == 27 or k == ord('q'):
+        db.close()
         break
 
-# cam.release()
+cam.release()
 # out.release()
 cv2.destroyAllWindows()

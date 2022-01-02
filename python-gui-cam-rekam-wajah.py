@@ -92,7 +92,7 @@ def captureImg():
     ret, frame = root.cap.read()
     path = pathlib.Path.cwd() / "assets" / name.get()
     path.mkdir(exist_ok=True)
-    img_name = 'assets/'+name.get()+'/'+name.get() + str(image_counter) + '.jpg'
+    img_name = 'assets/master/'+name.get() + str(image_counter) + '.jpg'
     crop = frame[y:y+h, x:x+w]
     crop = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
     cv2.imwrite(img_name, crop)
