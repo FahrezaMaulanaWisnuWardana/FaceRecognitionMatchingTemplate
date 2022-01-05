@@ -8,8 +8,7 @@ import mysql.connector
 import xlsxwriter
 import pyfirmata
 import time
-
-board = pyfirmata.Arduino("COM9")
+import csv
 
 db = mysql.connector.connect(
     host="localhost",
@@ -18,6 +17,7 @@ db = mysql.connector.connect(
     database="face-recognition"
 )
 conn = db.cursor()
+# for x in conn:
 # workbook = xlsxwriter.Workbook('Excel.xlsx')
 # worksheet = workbook.add_worksheet()
 
@@ -42,6 +42,11 @@ for file in files:
     counter += 1
 
 threshold = 0.7
+
+# board = pyfirmata.Arduino('COM8')
+
+# buzzer = board.get_pin()
+
 while True:
     ret, frame = cam.read()
     # img_resp = urllib.request.urlopen(url)
@@ -65,6 +70,11 @@ while True:
             img_class = scores.index(max(scores))
             res = cv2.matchTemplate(
                 img, templates[img_class], cv2.TM_CCOEFF_NORMED)
+            # print(res)
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+            loc = np.where(res >= 0.9)
+            # print(loc)
+            # print(min_loc, max_loc)
             loc = np.where(res >= threshold)
             for pt in zip(*loc[::-1]):
                 rgb_img = cv2.rectangle(
@@ -76,25 +86,24 @@ while True:
             position = (10, 50)
             cv2.putText(rgb_img, (os.path.splitext(os.path.basename(files[img_class]))[0]), position,
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 3)
+            # Query thing
             sql = "INSERT INTO absens(nama) VALUES('{0}')".format(name)
             conn.execute(sql)
             print("Inserted", conn.rowcount, "row(s) of data.")
-            board.digital[7].write(1)
-            board.digital[6].write(1)
-            time.sleep(0.3)
-            board.digital[7].write(0)
-            board.digital[6].write(0)
+            # board.digital[7].write(1)
+            # board.digital[6].write(1)
+            # time.sleep(0.3)
+            # board.digital[7].write(0)
+            # board.digital[6].write(0)
             db.commit()
-            # Query thing
-            # sqlSelect = "SELECT nama,DATE_FORMAT(waktu, '%Y-%m-%d') as waktu FROM absens WHERE DATE(waktu) = CURDATE() GROUP BY nama HAVING COUNT(nama)>1"
-            # conn.execute(sqlSelect)
-            # for dataz in conn.fetchall():
-            #     if dataz[0] == name:
-            #         print("Sudah absen")
-            #     else:
-            #         print("Belum absen")
+
+            with open('template.csv', 'w') as file:
+                writer = csv.writer(file)
+                writer.writerows(res)
 
     cv2.imshow('webcam', rgb_img)
+    cv2.imshow('result', res)
+
     k = cv2.waitKey(1) & 0xFF
     if k == 27 or k == ord('q'):
         db.close()
